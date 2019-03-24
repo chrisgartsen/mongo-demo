@@ -2,6 +2,7 @@ const express = require('express')
 const bodyParser = require('body-parser')
 
 const Location = require('./models/location')
+const Customer = require('./models/customer')
 
 require('./mongoose')
 
@@ -17,11 +18,26 @@ app.post('/menus', (req, res) => {
   res.send("Endpoint for creating a new menu.")
 })
 
-app.get('/customers', (req, res) => {
-  res.send("Endpoint for getting all customers.")
+app.get('/customers', async (req, res) => {
+  try {
+    const customers = await Customer.find().populate('location').exec() 
+    res.status(200).json(customers) 
+  } catch(error) {
+    res.status(500).json(error)
+  }
 })
 
-app.post('/customers', (req, res) => {
+app.post('/customers', async (req, res) => {
+  try {
+    const customer = new Customer({
+      name: req.body.name,
+      location: req.body.location
+    })
+    await customer.save()
+    res.status(201).json(customer)
+  } catch(error) {
+    res.status(500).json(error)
+  }
   res.send("Endpoint for creating a new customer.")
 })
 
